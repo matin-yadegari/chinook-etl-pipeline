@@ -1,0 +1,26 @@
+# secrets / local config
+.env.local
+.env
+# python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+
+# airflow
+airflow/logs/
+
+# data dumps
+*.bak
+*.mdf
+*.ldf
+
+# editors / OS
+.idea/
+.vscode/
+.DS_Store
+
+# Environment files
+.env
+.env.*
+!.env.example

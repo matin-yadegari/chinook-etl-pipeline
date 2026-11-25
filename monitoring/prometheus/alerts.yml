@@ -1,0 +1,46 @@
+groups:
+  - name: chinook-databases
+    rules:
+      - alert: SqlServerDown
+        expr: mssql_up == 0 or up{job="mssql"} == 0
+        for: 2m
+        labels: { severity: critical }
+        annotations:
+          summary: "SQL Server (source) is down"
+
+      - alert: PostgresStagingDown
+        expr: pg_up == 0 or up{job="postgres-staging"} == 0
+        for: 2m
+        labels: { severity: critical }
+        annotations:
+          summary: "Postgres staging is down"
+
+      - alert: ClickHouseDown
+        expr: up{job="clickhouse"} == 0
+        for: 2m
+        labels: { severity: critical }
+        annotations:
+          summary: "ClickHouse warehouse is down"
+
+  - name: chinook-etl
+    rules:
+      - alert: EtlStageStale
+        expr: time() - etl_last_success_timestamp_seconds > 1800
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: "ETL stage {{ $labels.stage }} / {{ $labels.table }} has not succeeded for 30+ minutes"
+
+      - alert: EtlRowsRejected
+        expr: etl_rejected_rows > 0
+        for: 1m
+        labels: { severity: warning }
+        annotations:
+          summary: "Data-quality rejects in {{ $labels.table }} (see etl_control.dq_rejects)"
+
+      - alert: DwReconciliationMismatch
+        expr: etl_reconciliation_diff != 0
+        for: 5m
+        labels: { severity: critical }
+        annotations:
+          summary: "ClickHouse and Postgres row counts differ for {{ $labels.table }}"
